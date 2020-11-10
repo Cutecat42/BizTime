@@ -30,13 +30,15 @@ router.get('/:code', async function(req, res, next) {
             return next({    
                 error: err.message,
                 status: err.status});
-        }
+        };
         res.json({"company": company.rows})
     }
     catch {
         const err = new ExpressError("Error with retrieving from database", 400);
-        return next(err);
-    }   
+        return next({    
+            error: err.message,
+            status: err.status});
+    }    
 });
 
 router.post('/', async function(req, res, next) {
@@ -55,6 +57,29 @@ router.post('/', async function(req, res, next) {
             error: err.message,
             status: err.status});
     }   
+});
+
+router.put('/:code', async function(req, res, next) {
+    try {
+        const {name, description} = req.body
+        let editCompany = await db.query(
+            `UPDATE companies 
+            SET name=$1, description=$2
+            WHERE code=$3
+            RETURNING code, name, description;`, [name, description, req.params.code]
+        );
+        if (editCompany.rows.length === 0) {
+            const err = new ExpressError("Company not Found", 404);
+            return next({    
+                error: err.message,
+                status: err.status});
+        };
+        res.json({"company": editCompany.rows})
+    }
+    catch {
+        const err = new ExpressError("Error with retrieving from database", 400);
+        return next(err);
+    }  
 });
 
 module.exports = router;
