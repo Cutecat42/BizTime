@@ -12,7 +12,7 @@ router.get('/', async function(req, res, next) {
         res.json({"companies": companies.rows})
     }
     catch {
-        const err = new ExpressError("Error with retrieving from database", 400);
+        const err = new ExpressError("Error with retrieving from database.", 400);
         return next({    
             error: err.message,
             status: err.status});
@@ -27,7 +27,7 @@ router.get('/:code', async function(req, res, next) {
             WHERE code=$1`, [req.params.code]
         );
         if (company.rows.length === 0) {
-            const err = new ExpressError("Company not Found", 404);
+            const err = new ExpressError("Company not Found.", 404);
             return next({    
                 error: err.message,
                 status: err.status});
@@ -35,7 +35,7 @@ router.get('/:code', async function(req, res, next) {
         res.json({"company": company.rows})
     }
     catch {
-        const err = new ExpressError("Error with retrieving from database", 400);
+        const err = new ExpressError("Error with retrieving from database.", 400);
         return next({    
             error: err.message,
             status: err.status});
@@ -53,7 +53,7 @@ router.post('/', async function(req, res, next) {
         res.json({"company": newCompany.rows})
     }
     catch {
-        const err = new ExpressError("Error with adding to database", 400);
+        const err = new ExpressError("Error with adding to database. Make sure to include 'code', 'name', and 'description'.", 400);
         return next({    
             error: err.message,
             status: err.status});
@@ -70,7 +70,7 @@ router.put('/:code', async function(req, res, next) {
             RETURNING code, name, description;`, [name, description, req.params.code]
         );
         if (editCompany.rows.length === 0) {
-            const err = new ExpressError("Company not Found", 404);
+            const err = new ExpressError("Company not Found.", 404);
             return next({    
                 error: err.message,
                 status: err.status});
@@ -78,7 +78,7 @@ router.put('/:code', async function(req, res, next) {
         res.json({"company": editCompany.rows})
     }
     catch {
-        const err = new ExpressError("Error with retrieving from database", 400);
+        const err = new ExpressError("Error with retrieving from database. Make sure to include 'name' and 'description'.", 400);
         return next({    
             error: err.message,
             status: err.status});
@@ -93,7 +93,7 @@ router.delete('/:code', async function(req, res, next) {
             RETURNING code`, [req.params.code]
         );
         if (deleteCompany.rows.length === 0) {
-            const err = new ExpressError("Company not Found", 404);
+            const err = new ExpressError("Company not Found.", 404);
             return next({    
                 error: err.message,
                 status: err.status});
@@ -101,7 +101,7 @@ router.delete('/:code', async function(req, res, next) {
         res.json({status: "deleted"})
     }
     catch {
-        const err = new ExpressError("Error with retrieving from database", 400);
+        const err = new ExpressError("Error with retrieving from database.", 400);
         return next({    
             error: err.message,
             status: err.status});

@@ -12,7 +12,7 @@ router.get('/', async function(req, res, next) {
         res.json({"invoices": invoices.rows})
     }
     catch {
-        const err = new ExpressError("Error with retrieving from database", 400);
+        const err = new ExpressError("Error with retrieving from database.", 400);
         return next({    
             error: err.message,
             status: err.status});
@@ -27,7 +27,7 @@ router.get('/:id', async function(req, res, next) {
             WHERE id=$1`, [req.params.id]
         );
         if (invoice.rows.length === 0) {
-            const err = new ExpressError("Invoice not Found", 404);
+            const err = new ExpressError("Invoice not Found.", 404);
             return next({    
                 error: err.message,
                 status: err.status});
@@ -35,7 +35,7 @@ router.get('/:id', async function(req, res, next) {
         res.json({"invoice": invoice.rows})
     }
     catch {
-        const err = new ExpressError("Error with retrieving from database", 400);
+        const err = new ExpressError("Error with retrieving from database.", 400);
         return next({    
             error: err.message,
             status: err.status});
@@ -63,16 +63,38 @@ router.post('/', async function(req, res, next) {
             );
             res.json({"invoice": newInvoice.rows})
         }
-        // console.log(newInvoice)
-
-        // res.json({"invoice": newInvoice.rows})
     }
     catch {
-        const err = new ExpressError("Error with adding to database", 400);
+        const err = new ExpressError("Error with adding to database.", 400);
         return next({    
             error: err.message,
             status: err.status});
     }   
+});
+
+router.put('/:id', async function(req, res, next) {
+    try {
+        const {paid, paid_date} = req.body
+        let editCompany = await db.query(
+            `UPDATE invoices 
+            SET paid=$1, paid_date=$2
+            WHERE id=$3
+            RETURNING id, comp_code, amt, paid, add_date, paid_date;`, [paid, paid_date, req.params.id]
+        );
+        if (editCompany.rows.length === 0) {
+            const err = new ExpressError("Invoice not Found.", 404);
+            return next({    
+                error: err.message,
+                status: err.status});
+        };
+        res.json({"company": editCompany.rows})
+    }
+    catch {
+        const err = new ExpressError("Error with retrieving from database. Make sure to include 'paid' and 'paid_date'.", 400);
+        return next({    
+            error: err.message,
+            status: err.status});
+    }  
 });
 
 
