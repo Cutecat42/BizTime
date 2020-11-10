@@ -12,18 +12,24 @@ router.get('/', async function(req, res, next) {
     }
     catch {
         const err = new ExpressError("Error with retrieving from database", 400);
-        return next(err);
+        return next({    
+            error: err.message,
+            status: err.status});
     }   
 });
 
 router.get('/:code', async function(req, res, next) {
     try {
         let company = await db.query(
-            `SELECT code, name, description FROM companies WHERE code=$1`, [req.params.code]
+            `SELECT code, name, description 
+            FROM companies 
+            WHERE code=$1`, [req.params.code]
         );
         if (company.rows.length === 0) {
             const err = new ExpressError("Company not Found", 404);
-            return next(err);
+            return next({    
+                error: err.message,
+                status: err.status});
         }
         res.json({"company": company.rows})
     }
@@ -36,16 +42,18 @@ router.get('/:code', async function(req, res, next) {
 router.post('/', async function(req, res, next) {
     try {
         const {code, name, description} = req.body
-        res.json(code)
-        console.log(req.body)
-    //     let companies = await db.query(
-    //         `SELECT code, name FROM companies`
-    //     );
-    //     res.json({"companies": companies.rows})
+        let newCompany = await db.query(
+            `INSERT INTO companies 
+            VALUES ($1, $2, $3)
+            RETURNING code, name, description;`, [code, name, description]
+        );
+        res.json({"company": newCompany.rows})
     }
     catch {
-        const err = new ExpressError("Error with retrieving from database", 400);
-        return next(err);
+        const err = new ExpressError("Error with adding to database", 400);
+        return next({    
+            error: err.message,
+            status: err.status});
     }   
 });
 
