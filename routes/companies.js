@@ -6,7 +6,8 @@ const router = new express.Router();
 router.get('/', async function(req, res, next) {
     try {
         let companies = await db.query(
-            `SELECT code, name FROM companies`
+            `SELECT code, name 
+            FROM companies`
         );
         res.json({"companies": companies.rows})
     }
@@ -97,11 +98,6 @@ router.delete('/:code', async function(req, res, next) {
                 error: err.message,
                 status: err.status});
         };
-        // await db.query(
-        //     `DELETE FROM companies 
-        //     WHERE code=$1
-        //     RETURNING code`, [req.params.code]
-        // );
         res.json({status: "deleted"})
     }
     catch {
