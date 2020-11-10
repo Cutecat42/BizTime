@@ -78,7 +78,37 @@ router.put('/:code', async function(req, res, next) {
     }
     catch {
         const err = new ExpressError("Error with retrieving from database", 400);
-        return next(err);
+        return next({    
+            error: err.message,
+            status: err.status});
+    }  
+});
+
+router.delete('/:code', async function(req, res, next) {
+    try {
+        let deleteCompany = await db.query(
+            `DELETE FROM companies 
+            WHERE code=$1
+            RETURNING code`, [req.params.code]
+        );
+        if (deleteCompany.rows.length === 0) {
+            const err = new ExpressError("Company not Found", 404);
+            return next({    
+                error: err.message,
+                status: err.status});
+        };
+        // await db.query(
+        //     `DELETE FROM companies 
+        //     WHERE code=$1
+        //     RETURNING code`, [req.params.code]
+        // );
+        res.json({status: "deleted"})
+    }
+    catch {
+        const err = new ExpressError("Error with retrieving from database", 400);
+        return next({    
+            error: err.message,
+            status: err.status});
     }  
 });
 
