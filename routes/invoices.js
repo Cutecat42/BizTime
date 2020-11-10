@@ -42,6 +42,39 @@ router.get('/:id', async function(req, res, next) {
     }    
 });
 
+router.post('/', async function(req, res, next) {
+    try {
+        const {comp_code, amt} = req.body
+        if(req.body.paid && req.body.paid_date) {
+            let paid = req.body.paid
+            let paid_date = req.body.paid_date
+            let newInvoice = await db.query(
+                `INSERT INTO invoices (comp_Code, amt, paid, paid_date)
+                VALUES ($1, $2, $3, $4)
+                RETURNING id, comp_code, amt, paid, add_date, paid_date;`, [comp_code, amt, paid, paid_date]
+            );
+            res.json({"invoice": newInvoice.rows})
+        }
+        else {
+            let newInvoice = await db.query(
+                `INSERT INTO invoices (comp_Code, amt)
+                VALUES ($1, $2)
+                RETURNING id, comp_code, amt, paid, add_date, paid_date;`, [comp_code, amt]
+            );
+            res.json({"invoice": newInvoice.rows})
+        }
+        // console.log(newInvoice)
+
+        // res.json({"invoice": newInvoice.rows})
+    }
+    catch {
+        const err = new ExpressError("Error with adding to database", 400);
+        return next({    
+            error: err.message,
+            status: err.status});
+    }   
+});
+
 
 
 
