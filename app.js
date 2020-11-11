@@ -12,8 +12,6 @@ app.use("/companies", companies);
 app.use("/invoices", invoices);
 
 
-
-
 app.use(function(req, res, next) {
   const err = new ExpressError("Not Found", 404);
   return next(err);
