@@ -4,6 +4,7 @@ const express = require("express");
 const router = new express.Router();
 
 router.get('/', async function(req, res, next) {
+    console.log(db)
     try {
         let companies = await db.query(
             `SELECT code, name 
@@ -21,34 +22,28 @@ router.get('/', async function(req, res, next) {
 
 router.get('/:code', async function(req, res, next) {
     try {
-        let company = await db.query(
+        let companyRes = await db.query(
             `SELECT code, name, description 
             FROM companies 
             WHERE code=$1`, [req.params.code]
         );
-        let invoices = await db.query(
+        let invoicesRes = await db.query(
             `SELECT id, amt, paid
             FROM invoices 
             WHERE invoices.comp_code=$1`, [req.params.code]
         );
-        console.log(invoices.rows)
+        let company = companyRes.rows[0];
+        // console.log(company)
+        company.invoices = invoicesRes.rows;
 
-        if (company.rows.length === 0) {
+        if (companyRes.rows.length === 0) {
             const err = new ExpressError("Company not Found.", 404);
             return next({    
                 error: err.message,
                 status: err.status});
         };
         
-        res.json({
-            "company": {
-                "code" : company.rows[0]["code"],
-                "name" : company.rows[0]["name"],
-                "description" : company.rows[0]["description"],
-                "invoices" : 
-                    invoices.rows               
-            }
-        });
+        res.json(company);
     }
     catch {
         const err = new ExpressError("Error with retrieving from database.", 400);
