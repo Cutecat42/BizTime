@@ -26,13 +26,29 @@ router.get('/:code', async function(req, res, next) {
             FROM companies 
             WHERE code=$1`, [req.params.code]
         );
+        let invoices = await db.query(
+            `SELECT id, amt, paid
+            FROM invoices 
+            WHERE invoices.comp_code=$1`, [req.params.code]
+        );
+        console.log(invoices.rows)
+
         if (company.rows.length === 0) {
             const err = new ExpressError("Company not Found.", 404);
             return next({    
                 error: err.message,
                 status: err.status});
         };
-        res.json({"company": company.rows})
+        
+        res.json({
+            "company": {
+                "code" : company.rows[0]["code"],
+                "name" : company.rows[0]["name"],
+                "description" : company.rows[0]["description"],
+                "invoices" : 
+                    invoices.rows               
+            }
+        });
     }
     catch {
         const err = new ExpressError("Error with retrieving from database.", 400);
