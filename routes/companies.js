@@ -2,6 +2,7 @@ const db = require("../db");
 const ExpressError = require("../expressError")
 const express = require("express");
 const router = new express.Router();
+const slugify = require('slugify');
 
 router.get('/', async function(req, res, next) {
     console.log(db)
@@ -33,7 +34,6 @@ router.get('/:code', async function(req, res, next) {
             WHERE invoices.comp_code=$1`, [req.params.code]
         );
         let company = companyRes.rows[0];
-        // console.log(company)
         company.invoices = invoicesRes.rows;
 
         if (companyRes.rows.length === 0) {
@@ -55,7 +55,10 @@ router.get('/:code', async function(req, res, next) {
 
 router.post('/', async function(req, res, next) {
     try {
-        const {code, name, description} = req.body
+        const {name, description} = req.body;
+        // console.log({name})
+        const code = slugify(name);
+        console.log(code)
         let newCompany = await db.query(
             `INSERT INTO companies 
             VALUES ($1, $2, $3)
@@ -64,7 +67,7 @@ router.post('/', async function(req, res, next) {
         res.json({"company": newCompany.rows})
     }
     catch {
-        const err = new ExpressError("Error with adding to database. Make sure to include 'code', 'name', and 'description'.", 400);
+        const err = new ExpressError("Error with adding to database. Make sure to include 'name', and 'description'.", 400);
         return next({    
             error: err.message,
             status: err.status});
